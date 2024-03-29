@@ -1,39 +1,50 @@
 let itemForm = document.getElementById("item-form");
-
 let itemInput = document.getElementById("item-input");
-
 let itemList = document.getElementById("item-list");
 let clearBtn = document.getElementById("clear");
 let filterItems = document.getElementById("filter");
+let btn = document.querySelector("button");
+let isEditMode = false;
+
+//let isNormalMode = true;
+function changeAddMode() {
+  if (isEditMode === false) isEditMode = false;
+
+  btn.className = "btn";
+  btn.innerHTML = `<i class="fa-solid fa-plus"></i> Add Item`;
+}
 
 // Create list item function
 function addItem(e) {
   e.preventDefault();
+  console.log("vo addItem si");
+  if (isEditMode === false) {
+    const newItem = itemInput.value;
+    // Validate input
+    if (itemInput.value === "") {
+      alert("Please add an item!");
+      return;
+    }
 
-  const newItem = itemInput.value;
-  // Validate input
-  if (itemInput.value === "") {
-    alert("Please add an item!");
-    return;
+    const button = createButton("remove-item btn-link text-red");
+
+    // Create list item
+    const li = document.createElement("li");
+    li.appendChild(document.createTextNode(newItem));
+    li.appendChild(button);
+
+    localStorage.setItem(`${newItem}`, `${li.innerHTML}`);
+
+    const liStored = localStorage.getItem(`${newItem}`);
+
+    li.createTextNode = `${liStored}`;
+    itemList.appendChild(li);
+    li.addEventListener("click", checkEdit);
+
+    checkUI();
+
+    itemInput.value = "";
   }
-
-  const button = createButton("remove-item btn-link text-red");
-
-  // Create list item
-  const li = document.createElement("li");
-  li.appendChild(document.createTextNode(newItem));
-  li.appendChild(button);
-
-  localStorage.setItem(`${newItem}`, `${li.innerHTML}`);
-
-  const liStored = localStorage.getItem(`${newItem}`);
-
-  li.createTextNode = `${liStored}`;
-  itemList.appendChild(li);
-
-  checkUI();
-  console.log(itemInput);
-  itemInput.value = "";
 }
 
 // Create button function
@@ -75,21 +86,35 @@ function clearItems() {
 
 //Check UI function
 function checkUI() {
-  const checkStorage = Object.keys(localStorage);
-
-  if (checkStorage.length == itemList.querySelectorAll("li").length) {
-    console.log("works");
-  } else {
-    console.log(itemList.querySelectorAll("li").length);
-    refreshWindow();
-  }
-  if (itemList.querySelector("li") === null) {
+  const checkStorageLi = Object.keys(localStorage);
+  if (checkStorageLi.length === 0) {
     clearBtn.style.display = "none";
     filterItems.style.display = "none";
   } else {
     clearBtn.style.display = "block";
     filterItems.style.display = "block";
   }
+  let testLiLength;
+  window.addEventListener("DOMContentLoaded", function () {
+    const checkStorageLi = Object.keys(localStorage);
+    if (checkStorageLi !== 0) {
+      let listedItem = document.querySelectorAll("li");
+      listedItem.forEach((item) => item.addEventListener("click", checkEdit));
+    } else {
+      let listedItem = document.querySelector("li");
+      listedItem.addEventListener("click", checkEdit);
+    }
+
+    testLiLength = itemList.querySelectorAll("li").length;
+
+    const checkStorage = Object.keys(localStorage);
+
+    if (checkStorage.length === testLiLength) {
+      console.log("works");
+    } else {
+      refreshWindow();
+    }
+  });
 }
 
 // Create new LI from the storage values
@@ -103,7 +128,7 @@ function refreshWindow() {
       let liValue = localStorage.getItem(`${localStorageKeys[i]}`);
 
       li.innerHTML = `${liValue}`;
-
+      li.addEventListener("click", checkEdit);
       itemList.appendChild(li);
     }
   }
@@ -191,56 +216,64 @@ function testFunction() {
 // Function check edit mode
 
 function checkEdit(e) {
-  if (e.target.classList.contains("fa-solid")) {
-    btnSubmitMode();
-  } else {
-    const itemToEdit = e.target;
+  if (isEditMode === true && e.target.classList.contains("fa-solid") != true) {
+    alert("NE IZVEDUVAJ");
+  }
+
+  if (isEditMode === true && e.target.classList.contains("fa-solid")) {
+  }
+  if (
+    isEditMode === false &&
+    e.target.classList.contains("fa-solid") === false
+  ) {
+    let itemToEdit = e.target;
+    isEditMode = true;
     btnEditMode(itemToEdit);
   }
 }
 
 // Function button edit mode
 function btnEditMode(item) {
-  changeId();
+  console.log("btn edit vrata");
+  if (isEditMode === true) {
+    isEditMode = true;
+  }
 
+  itemInput.value = item.textContent;
+  localStorage.removeItem(`${item.textContent}`);
   const editBtn = document.querySelector("button");
-  const itemForm2 = document.getElementById("edit-mode-item-form");
-  const itemInput2 = document.getElementById;
   editBtn.className = "btnEdit";
-  editBtn.innerText = "Edit item";
-  itemInput.value = item.innerText;
+  editBtn.textContent = "Update - item";
+  item.style.color = "grey";
 
-  editBtn.addEventListener(
-    "click",
-    btnSpecificMode(item, itemForm2, itemInput2)
-  );
-  //
-}
+  function pressEditItem(item) {
+    let li = document.createElement("li");
+    let button = createButton("remove-item btn-link text-red");
+    let newValue = itemInput.value;
+    item.textContent = newValue;
+    li.appendChild(document.createTextNode(newValue));
+    li.appendChild(button);
 
-// Function inside Button edit mode
+    localStorage.setItem(`${newValue}`, `${li.innerHTML}`);
+    const liStored = localStorage.getItem(`${newValue}`);
 
-function btnSpecificMode(item, form, input) {
-  const newValue = itemInput.value;
-  const button = createButton("remove-item btn-link text-red");
+    li.createTextNode = `${liStored}`;
+    itemList.appendChild(li);
+    item.remove();
+    li.addEventListener("click", checkEdit);
+    //isNormalMode = true;
 
-  const li = document.createElement("li");
-  li.appendChild(document.createTextNode(newValue));
-  li.appendChild(button);
-  localStorage.removeItem(`${item}`);
-  localStorage.setItem(`${newValue}`, `${li.innerHTML}`);
-  const liStored = localStorage.getItem(`${newValue}`);
-  li.createTextNode = `${liStored}`;
-  itemList.appendChild(li);
-}
-
-// Function changinh ID;s
-
-function changeId() {
-  let editForm = itemForm;
-
-  let editInput = itemInput;
-  let editList = itemList;
-  editForm.id = "edit-item-form";
+    isEditMode = false;
+    // Function reload
+    function reload() {
+      location.reload();
+    }
+    reload();
+  }
+  if (isEditMode === true)
+    editBtn.addEventListener("click", () => {
+      pressEditItem(item);
+    });
 }
 
 // Function button submit mode
@@ -248,16 +281,13 @@ function btnSubmitMode() {
   const editBtn = document.querySelector("button");
   editBtn.className = "btn";
   editBtn.innerHTML = `<i class="fa-solid fa-plus"></i> Add Item`;
-
-  console.log("btn edit mode off");
 }
 
 // Event listeners
+
 itemForm.addEventListener("submit", addItem);
 itemList.addEventListener("click", removeItem);
 clearBtn.addEventListener("click", clearItems);
 filterItems.addEventListener("input", filterItemsNew);
-
-itemList.addEventListener("click", checkEdit);
-
+btn.addEventListener("click", changeAddMode);
 checkUI();
