@@ -251,6 +251,7 @@ function btnEditMode(item) {
     let button = createButton("remove-item btn-link text-red");
     let newValue = itemInput.value;
     item.textContent = newValue;
+
     li.appendChild(document.createTextNode(newValue));
     li.appendChild(button);
 
@@ -272,7 +273,12 @@ function btnEditMode(item) {
   }
   if (isEditMode === true)
     editBtn.addEventListener("click", () => {
-      pressEditItem(item);
+      if (itemInput.value === "") {
+        alert("Error: Empty field");
+        btnEditMode(item);
+      } else {
+        pressEditItem(item);
+      }
     });
 }
 
