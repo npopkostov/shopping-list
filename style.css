@@ -71,6 +71,15 @@ header h1 {
   cursor: pointer;
 }
 
+.btnEdit {
+  background-color: green;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
 .btn:hover {
   background-color: #444;
 }
